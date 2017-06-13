@@ -4,6 +4,7 @@
 #include<string>
 #include<vector>
 #include<regex>
+#include<fstream>
 using namespace std;
 class user
 {
@@ -55,15 +56,87 @@ class file
 {
 private:
     string name;
-    bool stat;//文件状态
+    bool stat;//文件状态,打开还是关闭
     user* usr;//用户指针
+    bool write;//读权限
+    bool read;//写权限
+    bool execute;//执行权限
 public:
     file()
     {
         name="unnamed";
         stat=0;
-        usr=NULL;   
+        usr=NULL;
+        write=0;
+        read=0;
+        execute=0;
+           
     }
+    file(string n,bool s, user* u,bool r,bool w,bool e)
+    {
+        name=n;
+        stat=s;
+        usr=u;
+        write=w;
+        read=r;
+        execute=e;
+    }
+    ~file()
+    {
+        if(!usr)
+            delete usr;
+        usr=NULL;
+    }
+    string getName()
+    {
+        return name;
+    }
+    bool getStat()
+    {
+        return stat;
+    }
+    user* getUser()//可以这样吗？会不会有危险？
+    {
+        return usr;//??
+    }
+    bool getWrite()
+    {
+        return write;
+    }
+    bool getRead()
+    {
+        return read;   
+    }
+    bool getExecute()
+    {
+        return execute; 
+    }
+    void setName(const string n)
+    {
+        name=n;
+    }
+    void setStat(const bool s)
+    {
+        stat=s;
+    }
+    void setUser(user* u)//??
+    {
+        usr=u;
+    }
+    void setRead(const bool r)
+    {
+        read=r;
+    }
+    void setWrite(const bool w)
+    {
+        write=w;
+    }
+    void setExecute(const bool e)
+    {
+        execute=e;
+    }
+
+    
     
 };
 bool run=1;
@@ -112,7 +185,7 @@ int main()
         string str="0";
         str[0]=num;
         string name="usr"+str;
-        user temp(name,"/home",0);
+        user temp(name,"/home/sqxu/Desktop/os/1427405087徐双奇实验四",0);
         root.push_back(temp);
     }
     cout<<"已创建"<<read<<"个用户"<<endl;
@@ -192,6 +265,73 @@ void command(const  string input)
         
         cout<<"#"<<currentUser.getName()<<":没有该用户"<<endl;
     }
+    else if(regex_match(input,regex("(create)(\\s+)(\\w+)(\\s*)")))//create命令,有bug，不可有.
+    {
+       // smatch m;
+       // regex_search(input,m,regex("(\\s+)(\\w+)(\\s*)"));//匹配文件名，可能有多个匹配，注意
+       // cout<<m.str()<<endl;
+        string str=input;
+        str.erase(str.begin(),str.begin()+6);//删除create,接下来去除空格.
+        str.erase(0,str.find_first_not_of(" "));
+        str.erase(str.find_last_not_of(" ")+1);//去除尾部空格
+        str=currentUser.getAddress()+"/"+str;//文件绝对地址
+        if(currentUser.getCount()>=1)
+        {
+             cout<<"#"<<currentUser.getName()<<"已有文件，不可再创建文件!"<<endl;
+             return;
+        }
+        ofstream cf(str);//创建文件
+        currentUser.setCount(1);
+        cout<<"#"<<currentUser.getName()<<"文件创建成功"<<endl;
+
+
+        
+     }
+
+    else if(regex_match(input,regex("(delete)(\\s+)(\\w+)(\\s*)")))//删除文件
+    {
+        string str=input;
+        str.erase(str.begin(),str.begin()+6);//删除create,接下来去除空格.
+        str.erase(0,str.find_first_not_of(" "));
+        str.erase(str.find_last_not_of(" ")+1);//去除尾部空格
+        str=currentUser.getAddress()+"/"+str;//文件绝对地址
+        //用系统命令删除
+        if(currentUser.getCount()<1)
+        {
+            cout<<"#"<<currentUser.getName()<<":删除失败,当前用户没有文件!"<<endl;
+            return;
+        }
+            str="rm "+str;//shell 命令
+            system(str.c_str());//string 转 char*
+            
+        //    cout<<"#"<<currentUser.getName()<<":删除成功!"<<endl;
+
+            
+
+     }
+
+    else if(regex_match(input,regex("(read)(\\s+)(\\w+)(\\s*)")))
+    {
+        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+    }
+    
+    else if(regex_match(input,regex("(write)(\\s+)(\\w+)(\\s*)")))
+    {
+        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+    }
+    
+    else if(regex_match(input,regex("(open)(\\s+)(\\w+)(\\s*)")))
+    {
+        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+    }
+    
+    else if(regex_match(input,regex("(close)(\\s+)(\\w+)(\\s*)")))
+    {
+        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+    }
+
+
+
     else
     {
         // system(input.c_str());
