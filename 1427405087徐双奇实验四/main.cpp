@@ -301,8 +301,9 @@ void command(const  string input)
             cout<<"#"<<currentUser.getName()<<":删除失败,当前用户没有文件!"<<endl;
             return;
         }
-            str="rm "+str;//shell 命令
-            system(str.c_str());//string 转 char*
+        str="rm "+str;//shell 命令
+        system(str.c_str());//string 转 char*
+        currentUser.setCount(0);
             
         //    cout<<"#"<<currentUser.getName()<<":删除成功!"<<endl;
 
@@ -310,14 +311,50 @@ void command(const  string input)
 
      }
 
-    else if(regex_match(input,regex("(read)(\\s+)(\\w+)(\\s*)")))
+    else if(regex_match(input,regex("(read)(\\s+)(\\w+)(\\s*)")))//read ，命令
     {
-        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+        string str=input;
+        str.erase(str.begin(),str.begin()+4);//删除read,接下来去除空格.
+        str.erase(0,str.find_first_not_of(" "));//去除首部空格
+        str.erase(str.find_last_not_of(" ")+1);//去除尾部空格
+        str=currentUser.getAddress()+"/"+str;//文件绝对地址
+        //用系统命令读取
+        if(currentUser.getCount()<1)
+        {
+            cout<<"#"<<currentUser.getName()<<":读取失败,当前用户没有文件!"<<endl;
+            return;
+        }
+            str="cat "+str;//shell 命令
+            system(str.c_str());//string 转 char*
+
+       // cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
     }
     
-    else if(regex_match(input,regex("(write)(\\s+)(\\w+)(\\s*)")))
+    else if(regex_match(input,regex("(write)(\\s+)(\\w+)(\\s*)")))//write 命令
     {
-        cout<<"#"<<currentUser.getName()<<":to be done"<<endl;
+        string str=input;
+        str.erase(str.begin(),str.begin()+5);//删除write,接下来去除空格.
+        str.erase(0,str.find_first_not_of(" "));//去除首部空格
+        str.erase(str.find_last_not_of(" ")+1);//去除尾部空格
+        str=currentUser.getAddress()+"/"+str;//文件绝对地址
+        //用ofstream 写
+        if(currentUser.getCount()<1)
+        {
+            cout<<"#"<<currentUser.getName()<<":读取失败,当前用户没有文件!"<<endl;
+            return;
+        }
+            //str="cat "+str;//shell 命令
+           // system(str.c_str());//string 转 char*
+        ofstream f(str);
+        cout<<"#"<<currentUser.getName()<<"请输入文件内容:"<<endl;
+        while(getline(cin,str))
+        {   if(str.length()==0)
+            {
+                break;
+            }
+            
+            f<<str<<endl;
+        }
     }
     
     else if(regex_match(input,regex("(open)(\\s+)(\\w+)(\\s*)")))
